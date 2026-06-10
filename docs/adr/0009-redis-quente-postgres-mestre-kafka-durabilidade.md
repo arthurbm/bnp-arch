@@ -1,0 +1,7 @@
+# Armazenamento: Redis para o estado quente da Telemetria; PostgreSQL para dado mestre; Kafka como durabilidade do efêmero
+
+Cada serviço armazena conforme a natureza do seu dado. **Core**: PostgreSQL com um schema por módulo (ADR 0006) e PostGIS para as áreas de ecossistema da informação contextual. **Emergência**: PostgreSQL em instância separada e pequena — o isolamento de destino do ADR 0002 vale até o banco. **Telemetria**: as Últimas Posições Conhecidas vivem em Redis (`GEOSEARCH` resolve contagem por raio nativamente); o dado é efêmero por definição — cada posição substitui a anterior — e a história completa já vive no `telemetry.positions` com retenção longa, então um reinício reconstrói o estado relendo o rabo do tópico. O Kafka que já pagamos é a camada de durabilidade; o Redis pode perder tudo sem drama. Geometrias (zonas, corredores) são poucas dezenas, avaliadas em memória no serviço; o dado mestre delas é do Core.
+
+## Considered Options
+
+- **PostGIS também na Telemetria**: uma única tecnologia de banco no sistema (régua operacional forte para equipe pequena) e consultas espaciais ricas; rejeitado porque pagaria durabilidade permanente (WAL, vacuum) por um dado que morre a cada 30 segundos e seria reconstruído do Kafka de qualquer forma. Se um dia a riqueza espacial fizer falta, dá para materializar uma base PostGIS reprocessando o próprio Kafka — caminho de reversão barato.
