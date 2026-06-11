@@ -4,6 +4,8 @@
 **LLM utilizado:** Claude (Fable 5), via Claude Code, em sessão interativa com a equipe
 **Método:** [Design-First Collaboration (Rahul Garg, martinfowler.com)](https://martinfowler.com/articles/reduce-friction-ai/design-first-collaboration.html) — níveis progressivos Capabilities → Components → Interactions → Contracts, com aprovação humana em cada checkpoint e **nenhum artefato de nível seguinte antes de fechar o nível atual**
 
+**O processo, em resumo:** o protocolo do artigo foi executado como uma **entrevista estruturada** (skill `grill-with-docs`): a cada decisão, o agente apresentou opções genuínas com trade-offs e uma recomendação, e só avançou com aprovação da equipe — 17+ perguntas ao longo dos quatro níveis. Durante a conversa, e não depois dela, nasceram os artefatos: um **glossário de domínio** no espírito da linguagem ubíqua do DDD, atualizado termo a termo; **9 ADRs** registrados no momento de cada decisão, sob critério triplo (difícil de reverter + surpreendente + trade-off real); e **5 diagramas Excalidraw** construídos com um loop em que o próprio agente renderiza, inspeciona a imagem e corrige seus defeitos visuais. A equipe reverteu decisões do LLM em três momentos, contribuiu com duas capacidades que o LLM não propôs, e redirecionou o formato final dos entregáveis (consolidação + troca de Mermaid por Excalidraw). **O relato completo, com os momentos de steering e as ferramentas, está na seção 9.**
+
 Este documento é autocontido: contém a arquitetura completa, os diagramas, a avaliação de qualidade pelos critérios do grupo, o relato do processo e, em apêndice, **todos os ADRs na íntegra** e o glossário do domínio.
 
 ---
