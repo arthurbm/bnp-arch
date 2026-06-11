@@ -33,6 +33,7 @@ Matéria-prima sobre as ferramentas (detalhes na seção 9 do documento de arqui
 - O protocolo Design-First foi executado por **skills** do agente: `grill-with-docs` (entrevista incessante com opções + glossário DDD atualizado em tempo real + ADRs sob critério triplo) e `excalidraw-diagram` (diagramas com loop renderiza-inspeciona-corrige).
 - O glossário (`CONTEXT.md`) e os ADRs nasceram *durante* a conversa, termo a termo e decisão a decisão — não houve fase de "documentar depois"; a documentação nunca dessincronizou.
 - O processo se auto-corrigiu: quando reclamamos das opções superficiais, a regra anti-espantalho foi gravada no repositório e valeu dali em diante. *[Opinião: isso muda a relação de vocês com a ferramenta?]*
+- A primeira versão dos entregáveis não serviu (6 arquivos interligados com Mermaid, formato de repositório) e nós **redirecionamos**: documentos autocontidos com ADRs em apêndice, e diagramas em Excalidraw em vez de Mermaid — porque o Mermaid gera layout automático que ninguém controla e que o modelo não enxerga, enquanto no Excalidraw o agente renderiza, olha a imagem e corrige os próprios erros visuais, e o arquivo fica editável por nós. *[Opinião: a primeira saída da IA raramente é o entregável — como foi a experiência de redirecionar com critérios em vez de reescrever na mão?]*
 
 ## 5. Opinião sobre a arquitetura final
 

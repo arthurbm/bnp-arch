@@ -204,6 +204,18 @@ O Design-First do artigo é um *protocolo de conversa*; o que tornou o protocolo
 
 **O agente (Claude Code) como cola:** a mesma sessão que conduziu a entrevista editou os arquivos do repositório em tempo real (glossário, ADRs, este documento), versionou tudo em git e renderizou os diagramas — o que significa que **a documentação nunca esteve dessincronizada da conversa**. A diferença para a atividade anterior não foi só o protocolo (níveis com checkpoint), foi a infraestrutura: na primeira, o LLM devolvia texto para copiar; nesta, cada decisão aprovada virava artefato versionado no mesmo minuto.
 
+### Da primeira versão aos entregáveis: o steering também faz parte do processo
+
+Os documentos que você está lendo **não são a primeira versão** — e o caminho entre as duas é, em si, evidência de como a colaboração funcionou.
+
+**Primeira versão (fechamento do Nível 5):** o agente produziu a documentação no formato natural de um repositório de software — seis arquivos pequenos e interligados (`arquitetura.md`, `avaliacao-qualidade.md`, `processo-design-first.md`, `notas-comparativo.md`, mais `CONTEXT.md` e os 9 ADRs em arquivos separados), com diagramas em **Mermaid** embutidos no markdown. Para documentação *viva* de um repositório, esse formato é o correto: arquivos pequenos versionam bem, ADRs separados são referenciáveis, e Mermaid renderiza nativamente no GitHub.
+
+**O steering:** a equipe apontou o desencaixe com o enunciado — o professor pede *PDFs ou Docs* de evidências, e entregar 15 arquivos interligados obrigaria a "entregar a codebase inteira". O redirecionamento: documentos **autocontidos e em menor quantidade** (este documento absorveu os quatro intermediários, com ADRs na íntegra e glossário em apêndice), mantendo `CONTEXT.md` e `docs/adr/` como fonte viva no repositório. O mesmo conteúdo, dois formatos, cada um certo para seu leitor — e a primeira versão continua visível no histórico git, como evidência.
+
+**A troca Mermaid → Excalidraw:** a equipe também pediu a troca da ferramenta de diagramas, e a justificativa técnica merece registro. Mermaid gera o layout **automaticamente a partir de texto**: é barato e roda no GitHub, mas ninguém controla onde as caixas caem — o resultado é genérico, frequentemente feio, e o ponto decisivo: **o modelo não vê o que gerou**. Um diagrama Mermaid com rótulos colidindo ou setas cruzadas sai do jeito que sai. Com Excalidraw + o loop da skill, o agente **renderiza o diagrama em imagem, olha, e corrige** — neste trabalho, isso pegou e consertou rótulos sobrepostos, uma seta desconectada do estado de origem e colisões de texto, em 2–3 iterações por diagrama. Além do controle fino de layout que permite ao diagrama *argumentar* (a faixa vermelha do caminho de emergência, a árvore de utilidade com leiaute canônico), o formato `.excalidraw` fica versionado e **editável pela equipe** no excalidraw.com — o diagrama vira artefato colaborativo, não saída descartável. O custo honesto: cada diagrama exigiu ordens de grandeza mais trabalho que um bloco Mermaid; pagou-se porque o destino é um PDF avaliado, onde a qualidade visual carrega parte da nota.
+
+A lição que o grupo tira disso: com IA, a primeira saída raramente é o entregável — e o valor do processo está em poder **redirecionar com critérios** ("autocontido", "menos arquivos", "diagrama que se auto-corrige") em vez de reescrever na mão.
+
 ---
 
 ## Apêndice A — ADRs na íntegra
