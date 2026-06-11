@@ -28,6 +28,12 @@ Matéria-prima — três reversões e duas contribuições:
 
 *[Escrever: custo × benefício. O processo foi mais lento que pedir a arquitetura pronta? Entendemos cada decisão em vez de receber um bloco para decifrar? Em que tipo de tarefa NÃO vale a pena (o próprio artigo admite que para tarefas triviais o overhead não se justifica)? Usaríamos de novo?]*
 
+Matéria-prima sobre as ferramentas (detalhes na seção 9 do documento de arquitetura):
+
+- O protocolo Design-First foi executado por **skills** do agente: `grill-with-docs` (entrevista incessante com opções + glossário DDD atualizado em tempo real + ADRs sob critério triplo) e `excalidraw-diagram` (diagramas com loop renderiza-inspeciona-corrige).
+- O glossário (`CONTEXT.md`) e os ADRs nasceram *durante* a conversa, termo a termo e decisão a decisão — não houve fase de "documentar depois"; a documentação nunca dessincronizou.
+- O processo se auto-corrigiu: quando reclamamos das opções superficiais, a regra anti-espantalho foi gravada no repositório e valeu dali em diante. *[Opinião: isso muda a relação de vocês com a ferramenta?]*
+
 ## 5. Opinião sobre a arquitetura final
 
 *[Escrever: confiamos nela? O que ainda nos incomoda? Pontos honestos para citar: o serviço de Emergência como ponto singular (mitigado por redundância + SMS); a dependência de cooperação dos visitantes no modelo Waze; as decisões deixadas em aberto (hospedagem, auth) — falta de informação ou falha nossa em perguntar?]*

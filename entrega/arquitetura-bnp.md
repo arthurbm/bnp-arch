@@ -12,6 +12,10 @@ Este documento é autocontido: contém a arquitetura completa, os diagramas, a a
 
 O Bainomugisha Nature Park (BNP) encomendou um sistema para rastrear vida selvagem, informar visitantes e garantir segurança em **milhares de km² com cobertura celular instável**. O escopo definido pelo grupo cobre o sistema completo: o app do visitante, o app da equipe do parque (guias e médicos) e o console do centro de controle — o fluxo de emergência do enunciado só funciona com as três pontas.
 
+![Diagrama de contexto C4](../docs/diagramas/04-contexto-c4.png)
+
+O diagrama de contexto (C4, nível 1) enquadra o escopo: três atores humanos, três sistemas externos — e a saída de dados para Pesquisa & Conservação, que justificou uma das decisões de tecnologia mais importantes (ADR 0004).
+
 ### Princípios norteadores
 
 Quatro princípios emergiram das decisões e governam qualquer evolução futura:
@@ -135,6 +139,10 @@ Critérios definidos pelo grupo, avaliados por **cenários concretos** (mini-ATA
 | 4. Simplicidade operacional | Operabilidade, custo de propriedade |
 | 5. Privacidade & segurança | Segurança, conformidade |
 
+A árvore de utilidade abaixo — o artefato canônico do ATAM (Bass, Clements & Kazman, SEI) — organiza os 13 cenários por critério, cada um priorizado por **(Importância, Risco)**. Os cenários (A,A) e (M,A) são os pontos de atenção honestos da arquitetura:
+
+![Árvore de utilidade ATAM](../docs/diagramas/05-arvore-utilidade.png)
+
 **1 — Disponibilidade do caminho crítico.** *Sábado de pico, o broker de massa degrada sob a tempestade de spottings, um visitante aperta o pânico:* o pânico não toca o broker de massa — cluster dedicado + serviço próprio + banco próprio (ADRs 0002/0003/0009). *Ack ≤ 5s sob pico:* o caminho do ack atravessa só infraestrutura ociosa por definição (emergências são raras) — atende por construção. *O próprio serviço de Emergência cai:* risco residual honesto; mitigação por redundância + o fallback SMS do app, que não depende de componente nosso.
 
 **2 — Tolerância à rede real.** *Carro 40 min offline:* app segue funcional (estado retained, política local, buffer); na reconexão a sessão persistente entrega o que desceu e o buffer sobe com horário da medição — perde-se frescor, nunca dados, e a defasagem é visível. *Guia com rede oscilando:* QoS 1 reentrega; sem ack de máquina → SMS; sem Compromisso → "não respondeu" no console. A oscilação vira estado visível, não risco silencioso. *Frescor do spotting (desempenho):* todos os saltos são push; o gargalo honesto é a rede do visitante — exatamente o que a promessa "com entrega eventual" reconhece.
@@ -158,14 +166,20 @@ Critérios definidos pelo grupo, avaliados por **cenários concretos** (mini-ATA
 
 **Síntese:** a arquitetura concentra seu orçamento de complexidade nos dois pontos onde o enunciado não perdoa — o caminho de emergência e a rede instável — e compra simplicidade em todo o resto, com riscos residuais declarados em vez de escondidos.
 
-## 7. Decisões deliberadamente em aberto
+## 7. Ancoragem na literatura
+
+O documento cobre as vistas do modelo **4+1 de Kruchten**: a *vista lógica* é a seção de componentes e responsabilidades; a *vista de processo* são os fluxos do Nível 3 (sequência do pânico, vida do Spotting); os *cenários* — a quinta vista, que amarra as demais — são a avaliação ATAM da seção 6. A *vista de desenvolvimento* aparece nas decisões de organização de código (3 bases de cliente, monólito modular do Core — ADR 0006). A *vista física* (implantação) está **deliberadamente ausente**: a hospedagem é decisão em aberto por falta de informação sobre o uplink da sede do parque, e desenhar nós de infraestrutura agora seria fingir certeza — a ausência é uma decisão, não um esquecimento.
+
+Em termos de **estilos arquiteturais** (Shaw & Garlan), o sistema combina três, cada um onde seu trade-off compensa: *publish-subscribe orientado a eventos* no miolo (Kafka — desacoplamento temporal e replay), *cliente-servidor com mensageria* na borda (MQTT — a rede instável é absorvida pelo protocolo, não pelo código), e *camadas com módulos* dentro do Core. As notações usadas são **C4** (contexto e contêineres), **diagramas de sequência UML** (fluxos) e a **árvore de utilidade do ATAM** (avaliação).
+
+## 8. Decisões deliberadamente em aberto
 
 - **Hospedagem** (nuvem × datacenter na sede do parque): depende do uplink da sede — não havia informação para decidir sem inventar requisito.
 - **Provedor de identidade/auth** dos três clientes.
 - **Tiles de mapa offline** no app do visitante.
 - Valores concretos de limiares, frequências e timeouts — são configuração do parque, não arquitetura.
 
-## 8. Relato do processo (evidências)
+## 9. Relato do processo (evidências)
 
 A sessão seguiu os níveis do Design-First com **17 perguntas**, cada uma com opções genuínas e recomendação, aprovadas uma a uma pela equipe em call. Momentos-chave em que a colaboração mudou o design:
 
@@ -175,6 +189,20 @@ A sessão seguiu os níveis do Design-First com **17 perguntas**, cada uma com o
 - **Nível 4:** a equipe rejeitou Protobuf uniforme; o LLM reconheceu que a fronteira do híbrido coincide com a fronteira de carga já decidida, e a decisão saiu conjunta, com guardas (ADR 0008).
 
 **Resumo honesto:** três decisões do LLM foram revertidas ou refinadas por intervenção humana; duas contribuições da equipe entraram no design sem terem sido propostas pelo LLM; nenhuma linha de contrato foi escrita antes do nível correspondente fechar. O checkpoint por nível funcionou como o artigo descreve: desacordos custaram minutos, não retrabalho. A transcrição completa da sessão (prompts e respostas) acompanha este documento como anexo de evidências.
+
+### As ferramentas do processo: skills do agente
+
+O Design-First do artigo é um *protocolo de conversa*; o que tornou o protocolo executável na prática foram **skills** — instruções reutilizáveis instaladas no agente (Claude Code) que codificam um modo de trabalhar. Três tiveram papel estrutural:
+
+**`grill-with-docs` — a entrevista que produz documentação como efeito colateral.** A skill instrui o agente a entrevistar a equipe *incessantemente*, uma pergunta por vez, sempre com opções e uma recomendação — e foi ela que impôs a disciplina de nível do Design-First (o agente não avança sem aprovação). Três mecanismos dela explicam a forma dos nossos artefatos:
+
+- **Glossário vivo (`CONTEXT.md`), no espírito da linguagem ubíqua do DDD (Evans):** a skill manda capturar cada termo *no momento em que ele é resolvido na conversa*, não em lote no final — e o arquivo é criado sob demanda, a partir do primeiro termo. Foi assim que "Spotting", "Supressão", "Ciência", "Alcançabilidade" e "Compromisso" ganharam definição canônica e lista de sinônimos a evitar; quando um termo nosso conflitava com o glossário, o agente desafiava na hora. O Apêndice B é esse arquivo.
+- **ADRs sob demanda, com critério triplo:** a skill proíbe registrar ADR por ritual — só quando a decisão é (1) difícil de reverter, (2) surpreendente sem contexto e (3) fruto de trade-off real. Por isso são 9 ADRs e não 17: as decisões que falharam no teste (ex.: broadcast vs tópicos regionais, fácil de reverter) ficaram documentadas como texto comum, não como ADR. Cada ADR nasceu *na hora da decisão*, com as alternativas rejeitadas ainda frescas.
+- **Anti-espantalho:** após feedback da equipe ("as opções não recomendadas estão superficiais"), a regra "toda opção deve ser uma candidata genuína com defesa honesta" foi gravada no repositório (`AGENTS.md`) — ou seja, o processo se auto-corrigiu *e persistiu a correção* para qualquer sessão futura.
+
+**`excalidraw-diagram` — diagramas que argumentam.** A skill codifica uma filosofia ("diagramas devem ARGUMENTAR, não exibir": a estrutura visual deve espelhar o conceito — ex.: a faixa vermelha contínua do caminho de emergência no diagrama de componentes *é* o argumento do ADR 0002) e um processo: gerar o JSON por seções, **renderizar para PNG, inspecionar a imagem e corrigir em loop** até passar num checklist de defeitos visuais. Os 5 diagramas deste documento passaram por esse ciclo (colisões de rótulos e setas desconectadas foram detectadas e corrigidas na inspeção). Nota honesta: o renderizador da skill estava quebrado (dependência com 404 no CDN) e foi consertado durante a sessão — o conserto também ficou commitado.
+
+**O agente (Claude Code) como cola:** a mesma sessão que conduziu a entrevista editou os arquivos do repositório em tempo real (glossário, ADRs, este documento), versionou tudo em git e renderizou os diagramas — o que significa que **a documentação nunca esteve dessincronizada da conversa**. A diferença para a atividade anterior não foi só o protocolo (níveis com checkpoint), foi a infraestrutura: na primeira, o LLM devolvia texto para copiar; nesta, cada decisão aprovada virava artefato versionado no mesmo minuto.
 
 ---
 
